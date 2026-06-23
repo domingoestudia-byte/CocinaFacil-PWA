@@ -39,9 +39,11 @@ export default function RecetaPage() {
   if (cargando) {
     return (
       <div className="flex flex-col flex-1 bg-background">
-        <header className="bg-primary text-white shadow-md">
+        <header className="gradient-nouveau text-white shadow-lg">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-            <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+            <Link href="/" className="text-white/80 hover:text-white text-sm transition">
+              ← Volver
+            </Link>
           </div>
         </header>
         <div className="flex flex-1 items-center justify-center">
@@ -57,14 +59,20 @@ export default function RecetaPage() {
   if (error || !receta) {
     return (
       <div className="flex flex-col flex-1 bg-background">
-        <header className="bg-primary text-white shadow-md">
+        <header className="gradient-nouveau text-white shadow-lg">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-            <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+            <Link href="/" className="text-white/80 hover:text-white text-sm transition">
+              ← Volver
+            </Link>
           </div>
         </header>
         <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-12 text-center">
-          <p className="text-red-600 mb-4">{error || 'Receta no encontrada'}</p>
-          <Link href="/" className="text-primary underline">Volver al inicio</Link>
+          <div className="card-nouveau py-12">
+            <p className="text-red-600 mb-4">{error || 'Receta no encontrada'}</p>
+            <Link href="/" className="btn-nouveau inline-block">
+              Volver al inicio
+            </Link>
+          </div>
         </main>
       </div>
     );
@@ -72,14 +80,16 @@ export default function RecetaPage() {
 
   return (
     <div className="flex flex-col flex-1 bg-background">
-      <header className="bg-primary text-white shadow-md">
+      <header className="gradient-nouveau text-white shadow-lg">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+          <Link href="/" className="text-white/80 hover:text-white text-sm transition">
+            ← Volver
+          </Link>
         </div>
       </header>
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
-        <article className="bg-card rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
+        <article className="card-nouveau overflow-hidden animate-fade-in">
           {receta.imagen_url && (
             <div className="w-full h-64 sm:h-80 bg-gray-100">
               <img
@@ -91,12 +101,14 @@ export default function RecetaPage() {
           )}
 
           <div className="p-6 sm:p-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-3">{receta.nombre}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-3 ornament-top">
+              {receta.nombre}
+            </h1>
             {receta.descripcion && (
-              <p className="text-text-dark mb-6 leading-relaxed">{receta.descripcion}</p>
+              <p className="text-text-light mb-6 leading-relaxed">{receta.descripcion}</p>
             )}
 
-            <div className="flex flex-wrap gap-4 mb-8 text-sm text-gray-500">
+            <div className="flex flex-wrap gap-4 mb-8 text-sm text-text-light">
               {receta.tiempo_minutos && (
                 <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border border-border">
                   <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -115,10 +127,12 @@ export default function RecetaPage() {
 
             {receta.ingredientes && receta.ingredientes.length > 0 && (
               <section className="mb-8">
-                <h2 className="text-xl font-semibold text-primary mb-4">Ingredientes</h2>
+                <h2 className="text-xl font-semibold text-primary mb-4 ornament-top">
+                  Ingredientes
+                </h2>
                 <ul className="space-y-2">
                   {receta.ingredientes.map((ing, i) => (
-                    <li key={i} className="flex items-start gap-3 text-text-dark">
+                    <li key={i} className="flex items-start gap-3 text-text-light">
                       <span className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                       {ing}
                     </li>
@@ -129,14 +143,16 @@ export default function RecetaPage() {
 
             {receta.pasos && receta.pasos.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-primary mb-4">Preparación</h2>
+                <h2 className="text-xl font-semibold text-primary mb-4 ornament-top">
+                  Preparación
+                </h2>
                 <ol className="space-y-4">
                   {receta.pasos.map((paso, i) => (
                     <li key={i} className="flex gap-4">
                       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
                         {i + 1}
                       </span>
-                      <p className="text-text-dark pt-1 leading-relaxed">{paso}</p>
+                      <p className="text-text-light pt-1 leading-relaxed">{paso}</p>
                     </li>
                   ))}
                 </ol>
