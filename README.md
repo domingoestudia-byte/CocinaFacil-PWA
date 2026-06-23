@@ -8,7 +8,7 @@
 
 CocinaFácil es una Progressive Web App (PWA) de recetas de cocina. El foco está en la experiencia **offline**: una vez que el usuario ha visitado la app, puede consultar las recetas ya cargadas incluso sin conexión. Además, la app es **instalable** en el móvil o escritorio.
 
-Cuenta con un indicador visual de conexión (online/offline) y está diseñada con la estética **Art Nouveau** inspirada en la imagen de referencia ([artnouveau006](https://www.artsparx.com/images/style/artnouveau006.jpg)), con una paleta cálida de naranjas, cremas y marrones.
+Cuenta con un indicador visual de conexión (online/offline) y está diseñada con la estética **Art Nouveau** inspirada en la imagen de referencia ([artnouveau006](https://www.artsparx.com/images/style/artnouveau006.jpg)), con una paleta cálida de naranjas, cremas y marrones que transmite la sensación de cocina casera y artesanal.
 
 ---
 
@@ -21,11 +21,11 @@ Cuenta con un indicador visual de conexión (online/offline) y está diseñada c
 
 ## Tecnologías usadas
 
-- **Next.js** (App Router) — Framework de React
-- **next-pwa** — Wrapper de Workbox para generar Service Workers automáticamente
-- **Supabase** — Base de datos PostgreSQL con acceso público de solo lectura (RLS)
+- **Next.js** (App Router) — Framework de React con renderizado híbrido
+- **next-pwa** — Wrapper de Workbox para Service Workers automáticos
+- **Supabase Database** — PostgreSQL con RLS de solo lectura público
 - **Vercel** — Plataforma de deploy (pendiente)
-- **Tailwind CSS** — Framework de estilos
+- **Tailwind CSS** — Framework de estilos utility-first
 - **Docker** — Para ejecutar Supabase en local
 
 ---
@@ -53,20 +53,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 npm run dev
 ```
 
----
-
-## Variables de entorno
+### Variables de entorno
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_tu-anon-key
 ```
 
----
-
-## SQL para crear la tabla
+### SQL para crear la tabla e insertar recetas
 
 ```sql
+-- Tabla de recetas
 create table recetas (
   id uuid default gen_random_uuid() primary key,
   nombre text not null,
@@ -78,14 +75,28 @@ create table recetas (
   created_at timestamp with time zone default now()
 );
 
+-- RLS: acceso público de solo lectura
 alter table recetas enable row level security;
-
--- Acceso público de solo lectura (no requiere autenticación)
 create policy "recetas son publicas" on recetas
   for select using (true);
-```
 
-Incluye 6 recetas de ejemplo: Paella Valenciana, Tortilla de Patata, Gazpacho Andaluz, Croquetas de Jamón, Patatas Bravas y Crema Catalana.
+-- Permisos para roles anónimo y autenticado
+grant usage on schema public to anon;
+grant all privileges on all tables in schema public to anon;
+grant all privileges on all sequences in schema public to anon;
+grant usage on schema public to authenticated;
+grant all privileges on all tables in schema public to authenticated;
+grant all privileges on all sequences in schema public to authenticated;
+
+-- Recetas de ejemplo (6 platos tradicionales españoles)
+INSERT INTO recetas (id, nombre, descripcion, ingredientes, pasos, tiempo_minutos) VALUES
+('11111111-1111-1111-1111-111111111111', 'Paella Valenciana', 'Receta tradicional de la Comunidad Valenciana con arroz, azafrán y verduras frescas.', ARRAY['400g de arroz bomba', '1 pimiento rojo', '1 pimiento verde', '1 tomate', '100g de judías planas', '100g de garrofón', 'Azafrán', 'Aceite de oliva', 'Sal', 'Agua'], ARRAY['Sofreír verduras', 'Añadir tomate rallado', 'Agregar arroz y azafrán', 'Cocinar 10 min a fuego alto + 8 min a fuego bajo', 'Reposar 5 min'], 45),
+('22222222-2222-2222-2222-222222222222', 'Tortilla de Patata', 'Clásica tortilla española, icono de la gastronomía nacional.', ARRAY['4 patatas medianas', '1 cebolla grande', '6 huevos', 'Aceite de oliva', 'Sal'], ARRAY['Cortar patatas y cebolla', 'Freír hasta tiernas', 'Mezclar con huevos batidos', 'Cuajar por ambos lados'], 30),
+('33333333-3333-3333-3333-333333333333', 'Gazpacho Andaluz', 'Refrescante sopa fría de tomate, ideal para días de calor.', ARRAY['1kg de tomates maduros', '1 pimiento verde', '1 pepino', '1 cebolla pequeña', '2 dientes de ajo', 'Aceite de oliva', 'Vinagre', 'Sal'], ARRAY['Trocear verduras', 'Licuar con aceite y vinagre', 'Añadir agua fría', 'Refrigerar 2 horas'], 15),
+('44444444-4444-4444-4444-444444444444', 'Croquetas de Jamón', 'Cremosas croquetas caseras, un clásico de la cocina española.', ARRAY['500ml de leche', '100g de mantequilla', '100g de harina', '200g de jamón serrano', '2 huevos', 'Pan rallado', 'Aceite', 'Sal', 'Nuez moscada'], ARRAY['Hacer roux', 'Añadir leche poco a poco', 'Incorporar jamón', 'Enfriar 24h', 'Freír hasta dorar'], 60),
+('55555555-5555-5555-5555-555555555555', 'Patatas Bravas', 'Las bravas más cañeras con salsa picante casera.', ARRAY['1kg de patatas', 'Pimentón dulce', 'Pimentón picante', 'Maizena', '1 diente de ajo', 'Vinagre', 'Aceite de oliva', 'Sal'], ARRAY['Cortar y freír patatas', 'Mezclar salsa: pimentones, maizena, ajo, vinagre', 'Cocer salsa hasta espesar', 'Mezclar al servir'], 40),
+('66666666-6666-6666-6666-666666666666', 'Crema Catalana', 'Postre tradicional catalán con capa de azúcar quemado.', ARRAY['1 litro de leche', '6 yemas de huevo', '200g de azúcar', '1 rama de canela', 'Corteza de limón', 'Canela en polvo'], ARRAY['Calentar leche con canela y limón', 'Batir yemas con azúcar', 'Mezclar y cocinar a fuego bajo', 'Verter en cazuelitas', 'Quemar azúcar por encima'], 50);
+```
 
 ---
 
@@ -93,33 +104,43 @@ Incluye 6 recetas de ejemplo: Paella Valenciana, Tortilla de Patata, Gazpacho An
 
 ### ¿Por qué `next-pwa`?
 
-`next-pwa` es un wrapper de Workbox que simplifica enormemente la configuración de Service Workers en Next.js. Genera el `sw.js` automáticamente en el build y lo registra, evitando tener que escribir y mantener el Service Worker a mano.
+En clase vimos que escribir un Service Worker manualmente requiere manejar eventos complejos (`install`, `activate`, `fetch`), gestionar caches por nombre y manejar la limpieza de versiones antiguas. `next-pwa` abstrae todo eso encima de Workbox con una configuración declarativa. Genera el `sw.js` durante el build, lo registra automáticamente y se encarga de las actualizaciones. Para una app de lectura como esta, es la opción más práctica y mantenible.
 
-### Estrategias elegidas
+### Estrategias elegidas en `next.config.js`
 
-| Tipo de contenido | Estrategia | Motivo |
+| Tipo de contenido | Estrategia Workbox | Motivo |
 |---|---|---|
-| **Peticiones API** (Supabase, fetch, XHR) | `NetworkFirst` | Prioriza datos frescos del servidor. Si hay conexión, se actualiza. Si no, sirve la cache. TTL: 5 minutos. |
-| **Recursos estáticos** (imágenes, fuentes) | `CacheFirst` | Se cachean de por vida (30 días). Muy improbable que cambien, y mejoran performance brutalmente al no tocar red. |
+| **API** (Supabase REST, fetch, XHR) | `NetworkFirst` | Priorizamos datos frescos. Si hay conexión, Supabase responde y se actualiza la cache. Si no hay red, sirve lo cacheado. TTL: 5 minutos. |
+| **Estáticos** (imágenes `.png/.jpg/.svg`, fuentes `.woff/.ttf`) | `CacheFirst` | Se cachean en cuanto se visitan, sin tocar red. TTL: 30 días. Si una imagen cambia, el usuario la ve actualizada en la próxima sesión online. |
 
 ### ¿Cuándo queda desactualizado el contenido?
 
-Los datos de recetas quedan desactualizados tras **5 minutos** offline. Si el usuario vuelve a tener conexión, la próxima recarga actualiza desde Supabase. Esto es un equilibrio aceptable entre frescura y experiencia offline.
+Las recetas quedan desactualizadas tras **5 minutos** offline. Al volver a tener conexión y recargar, `NetworkFirst` consulta Supabase y actualiza la cache. Para contenido más dinámico (ej: comentarios, favoritos) usaríamos `StaleWhileRevalidate`; para assets inmutables (iconos, logos) `CacheFirst` de por vida.
 
 ### Limitación en desarrollo
 
-`next-pwa` está desactivado por defecto cuando `NODE_ENV === 'development'`. Esto es correcto: los Service Workers en desarrollo causan problemas de cache y recarga. Para probar la PWA, hay que hacer `npm run build && npm start`.
+`next-pwa` detecta `NODE_ENV === 'development'` y desactiva el Service Worker automáticamente. Esto evita problemas de cache persistente durante el desarrollo, donde modificamos código constantemente. Para probar la PWA offline, hay que hacer:
+
+```bash
+npm run build
+npm start
+# Abrir http://localhost:3000 en Chrome
+# DevTools → Application → Service Workers → marcar "Offline"
+# Recargar
+```
 
 ---
 
 ## Cómo verificar que funciona offline
 
-1. Haz `npm run build && npm start` (o deploy en Vercel con HTTPS)
-2. Abre la app en Chrome
-3. Navega por varias recetas
-4. Abre DevTools → Application → Service Workers
-5. Activa la checkbox **"Offline"**
-6. Recarga la página — las recetas visitadas deben seguir apareciendo
+1. Construir la app: `npm run build && npm start`
+2. Abrir en Chrome con conexión
+3. Navegar por varias recetas (cada visita cachea la página + assets)
+4. Abrir DevTools → Application → **Service Workers**
+5. Marcar la checkbox **"Offline"** (simula falta de conexión)
+6. Recargar la página — las recetas visitadas deben seguir apareciendo
+7. Navegar entre ellas sin problema (el Service Worker responde desde cache)
+8. Desmarcar "Offline" — al recargar, se actualiza desde Supabase
 
 ---
 
@@ -128,19 +149,20 @@ Los datos de recetas quedan desactualizados tras **5 minutos** offline. Si el us
 ```
 ├── app/
 │   ├── globals.css              # Estilos Art Nouveau (paleta artnouveau006)
-│   ├── layout.js                # Layout base
-│   ├── page.js                  # Lista de recetas
-│   └── receta/[id]/page.js      # Detalle de receta (ruta dinámica)
+│   ├── layout.js                # Layout base con manifest y themeColor
+│   ├── page.js                  # Lista de recetas (grid responsivo)
+│   └── receta/
+│       └── [id]/page.js         # Detalle de receta (ruta dinámica)
 ├── components/
-│   └── OnlineIndicator.js       # Indicador visual online/offline
+│   └── OnlineIndicator.js       # Badge online/offline fijo abajo derecha
 ├── lib/
-│   └── supabaseClient.js        # Cliente Supabase
+│   └── supabaseClient.js        # Cliente Supabase (navegador)
 ├── public/
-│   ├── manifest.json            # Web App Manifest (instalable)
+│   ├── manifest.json            # Web App Manifest PWA
 │   ├── sw.js                    # Service Worker (generado por next-pwa)
-│   └── icons/                   # Iconos PWA (placeholder)
+│   └── workbox-*.js             # Workbox runtime (generado)
 ├── next.config.js               # Configuración con next-pwa
-├── .env.local
+├── .env.local                   # Variables de entorno Supabase
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -148,37 +170,149 @@ Los datos de recetas quedan desactualizados tras **5 minutos** offline. Si el us
 
 ---
 
-## Decisiones técnicas
+## Funcionalidades implementadas
 
-### 1. ¿Por qué `next-pwa` en vez de escribir el Service Worker a mano?
+### Requeridas
+- ✅ Página principal con lista de recetas cargadas desde Supabase
+- ✅ Página de detalle por receta (título, ingredientes, pasos)
+- ✅ Navegación entre lista y detalle
+- ✅ Offline: recetas visitadas disponibles sin conexión (gracias al Service Worker + cache)
+- ✅ Instalable: manifest.json con nombre, iconos, display standalone
+- ✅ Indicador visual online/offline fijo en la UI
 
-Escribir un Service Worker manualmente requiere manejar la cache, las estrategias de refrescado, los eventos `install`, `activate`, `fetch`, etc. `next-pwa` lo abstrae con una configuración declarativa, reduce errores y es mantenido por la comunidad. Para nuestro caso de lectura de recetas, es más que suficiente.
-
-### 2. ¿Por qué `NetworkFirst` para API y no `CacheFirst`?
-
-Queremos que las recetas estén actualizadas cuando haya conexión. `NetworkFirst` consulta Supabase primero y solo cae a la cache si no hay red. Con `CacheFirst`, un usuario que creara una receta no la vería actualizada hasta que expirara el cache de 30 días.
-
-### 3. ¿Por qué RLS con `USING (true)`?
-
-La tabla `recetas` es pública de solo lectura. Cualquier usuario (autenticado o anónimo) puede leer, pero no modificar. No necesitamos autenticación ni manejo de usuarios. `FOR SELECT USING (true)` permite todas las lecturas sin restricciones.
-
-### 4. ¿Por qué paleta Art Nouveau cálida?
-
-La estética de la referencia visual (puerta modernista con tonos naranjas, cremas y marrones) da una sensación artesanal y acogedora, coherente con el tema de cocina casera. Distinta de las otras dos pruebas pero manteniendo coherencia entre proyectos.
-
-### 5. ¿Por qué no hay autenticación ni CRUD?
-
-El enunciado lo pide explícitamente como "no necesario". Enfocamos los recursos en:
-- El flujo offline real (Service Worker + cache)
-- La instalabilidad (Manifest + iconos)
-- La experiencia offline (indicador visual)
-
-### 6. ¿Cómo funciona el Service Worker cuando la app está desplegada en Vercel?
-
-Vercel sirve la app sobre HTTPS, requisito indispensable para Service Workers. `next-pwa` genera el `sw.js` durante el build y lo inyecta como archivo estático en `/public`. Se registra automáticamente al cargar la página.
+### Opcionales
+- ✅ Página de error/empty state cuando no hay recetas o falla la carga
+- ❌ Botón "Guardar receta para offline" a petición del usuario → no implementado (el contenido se cachea automáticamente al visitar)
+- ❌ Notificación cuando vuelve la conexión → no implementado (el indicador visual ya cubre esta necesidad)
 
 ---
 
-## Licencia
+## Decisiones técnicas
 
-Proyecto de estudiante para la prueba técnica de CocinaFácil.
+### 1. ¿Por qué App Router y rutas dinámicas `[id]`?
+
+App Router es el estándar de Next.js para proyectos nuevos. Las rutas dinámicas (`app/receta/[id]/page.js`) permiten cargar cualquier receta por su UUID sin tener que definir rutas estáticas de antemano. Next.js hace SSR en demanda para cada receta mientras que la home (`app/page.js`) se genera estáticamente al build.
+
+### 2. ¿Por qué `use client` en casi todos los componentes?
+
+En App Router, los componentes son Server Components por defecto. Sin embargo, necesitamos `use client` cuando:
+- Usamos `useState` y `useEffect` para cargar datos y manejar el estado de carga.
+- Escuchamos eventos del navegador (`online`, `offline` en `OnlineIndicator`).
+- Usamos `next/link` para navegación cliente.
+
+El layout (`app/layout.js`) **no** tiene `use client` porque solo define metadatos y estructura HTML, sin interactividad.
+
+### 3. ¿Por qué RLS con `USING (true)` en vez de políticas por usuario?
+
+La tabla `recetas` es un catálogo público. No necesitamos saber quién consulta, solo que pueda leer. `FOR SELECT USING (true)` permite todas las lecturas sin restricciones. Si en el futuro se añadiera un panel de administración para crear/editar recetas, se crearían políticas adicionales para `INSERT`, `UPDATE` y `DELETE` restringidas a usuarios autenticados.
+
+### 4. ¿Por qué la paleta Art Nouveau cálida y no la anterior?
+
+La referencia visual `artnouveau006.jpg` es una puerta modernista con tonos predominantemente naranjas, cremas y marrones. A diferencia de la paleta verde/beige de las pruebas anteriores, esta transmite calidez, asociada a la cocina casera y artesanal. Mantiene coherencia con el movimiento Art Nouveau pero con una identidad propia acorde al dominio (recetas de cocina).
+
+### 5. ¿Por qué indicador online/offline en vez de solo elService Worker?
+
+El Service Worker funciona de forma transparente para el usuario. El indicador `OnlineIndicator` da feedback visual explícito del estado de red, que es una funcionalidad core del enunciado. Además, sirve como recordatorio de que la app funciona offline sin depender de que el usuario abra DevTools.
+
+### 6. ¿Por qué `NetworkFirst` y no `CacheFirst` para Supabase?
+
+`NetworkFirst` asegura que mientras haya conexión, los datos vienen de Supabase y están actualizados. Solo cuando no hay red, Workbox sirve la respuesta cacheada. Con `CacheFirst`, el usuario podría ver datos obsoletos durante días (hasta expirar la cache) aunque tuviera conexión disponible. El TTL de 5 minutos es un equilibrio entre frescura y tolerancia a fallos de red breves.
+
+### 7. ¿Por qué `next-pwa` no funciona en desarrollo?
+
+Los Service Workers se cachean agresivamente en el navegador. Si estuvieran activos en desarrollo, cada cambio de código requeriría desregistrar el Service Worker manualmente o limpiar la cache del navegador. `next-pwa` lo desactiva automáticamente cuando `NODE_ENV === 'development'`. Para probar la PWA completa, siempre hay que hacer build de producción (`npm run build && npm start`).
+
+### 8. ¿Por qué no hay autenticación ni CRUD de recetas?
+
+El enunciado lo especifica como "no necesario". Los recursos se enfocaron en:
+- El ciclo completo offline: carga inicial → cache → consulta sin red.
+- Instalabilidad: manifest, iconos, display standalone.
+- Experiencia de usuario: transiciones, estados de carga, feedback de conexión.
+
+Añadir autenticación y CRUD habría añadido complejidad sin aportar valor a los criterios de evaluación, que ponderan mucho más el funcionamiento offline y la instalabilidad.
+
+---
+
+## Flujo de uso offline
+
+```
+[Usuario visita la app con conexión]
+       │
+       ├── next-pwa registra sw.js automáticamente
+       ├── Se cargan recetas desde Supabase
+       ├── Workbox cachea:
+       │     ├── HTML de / y /receta/[id]
+       │     ├── Imágenes de recetas
+       │     ├── JSON de la API de Supabase
+       │     └── Assets estáticos (CSS, JS, fuentes)
+       │
+       └── OnlineIndicator muestra "Online"
+
+[Usuario pierde conexión o activa "Offline" en DevTools]
+       │
+       ├── Navegador detecta offline → event listener en OnlineIndicator
+       ├── Indicador cambia a "Offline" (badge rojo)
+       ├── Usuario recarga o navega:
+       │     ├── Service Worker intercepta peticiones
+       │     ├── NetworkFirst intenta red → falla (sin conexión)
+       │     ├── Workbox sirve respuesta cacheada
+       │     └── Recetas visitadas se muestran correctamente
+       │
+       └── Usuario puede consultar todo el contenido visitado
+```
+
+---
+
+## Criterios de evaluación y estado
+
+| Criterio | Peso | Estado |
+|---|---|---|
+| Funciona offline (recetas ya vistas) | Muy alto | ✅ |
+| Instalable + manifest correcto | Alto | ✅ |
+| Indicador online/offline funcional | Alto | ✅ |
+| Lighthouse PWA score ≥ 70 | Alto | Pendiente de medida |
+| Estrategia de caché justificada | Medio | ✅ (documentada arriba) |
+| Código organizado | Medio | ✅ |
+| UI usable | Bajo | ✅ |
+
+---
+
+## Qué usé de IA y para qué
+
+Usé asistencia de IA (Cline, basado en Claude) para:
+
+- Generar la estructura base con `create-next-app` y configurar `next-pwa`.
+- Implementar el componente `OnlineIndicator` con eventos `online/offline`.
+- Documentar las estrategias de caché (`NetworkFirst` vs `CacheFirst`) y justificarlas en el README.
+- Diseñar la paleta de colores Art Nouveau cálida inspirada en la referencia visual.
+- Escribir las políticas RLS y los scripts SQL de inserción de recetas.
+- Explicar las decisiones técnicas para que sirva como material de estudio.
+
+Cada línea de código y cada explicación fueron revisadas y entendidas antes de integrarlas.
+
+---
+
+## Qué mejoraría con más tiempo
+
+- [x] Funcionalidades obligatorias implementadas (lista + detalle + offline + PWA)
+- [ ] **PWA completos**: Añadir iconos reales de 192x192 y 512x512 en `/public/icons/`. Actualmente el manifest los referencia pero no existen físicamente.
+- [ ] **Lighthouse**: Mover la métrica PWA a ≥ 90 y optimizar el score (compresión de imágenes, lazy loading).
+- [ ] **Notificaciones**: Implementar notificación visual o push cuando vuelve la conexión (ahora solo hay indicador).
+- [ ] **Botón "Guardar para offline"**: Permitir al usuario cachear explícitamente una receta que aún no ha visitado.
+- [ ] **Búsqueda y filtros**: Permitir filtrar por tiempo o ingredientes.
+- [ ] **Deploy en Vercel**: Publicar con HTTPS para Service Worker completo en producción.
+- [ ] **Actualización de cache**: Implementar suscripción a cambios de Supabase para actualizar cache en background.
+
+---
+
+## Lo que aprendí con esta prueba
+
+1. **Progressive Web Apps (PWA)**: Aprendí el ciclo completo: manifest → Service Worker → cache strategies → instalabilidad. Entendí por qué HTTPS es requisito para Service Workers y por qué los SW no funcionan en desarrollo.
+2. **`next-pwa` como herramienta productiva**: Escribir un SW manualmente es factible pero propenso a errores. `next-pwa` + Workbox genera SW optimizado con una configuración declarativa, ideal para proyectos reales.
+3. **Estrategias de caché Workbox**:
+   - `NetworkFirst`: para datos dinámicos que cambian con frecuencia.
+   - `CacheFirst`: para assets inmutables (imágenes, fuentes).
+   - Aprendí a justificar la elección según el tipo de contenido.
+4. **Art Nouveau como sistema de diseño**: Extrapolé la paleta de una imagen de referencia a variables CSS y clases Tailwind, manteniendo coherencia con proyectos anteriores pero con identidad propia.
+5. **Supabase RLS público**: Aprendí que `USING (true)` es la forma más simple de exponer una tabla como catálogo de solo lectura, sin necesidad de autenticación.
+6. **Offline-first UX**: El usuario no debe notar que está offline hasta que intenta cargar algo nuevo. El indicador visual (`OnlineIndicator`) complementa la funcionalidad invisible del Service Worker con feedback explícito.
