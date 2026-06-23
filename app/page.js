@@ -34,82 +34,110 @@ export default function Home() {
 
   return (
     <div className="flex flex-col flex-1 bg-background">
-      <header className="gradient-nouveau text-white shadow-lg">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <header className="header-nouveau text-white shadow-md">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 relative z-10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🍳</span>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">CocinaFácil</h1>
-                <p className="text-sm opacity-90">Recetas offline</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl drop-shadow-sm">🍳</span>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                CocinaFácil
+              </h1>
             </div>
+            <p className="text-sm text-secondary-light hidden sm:block italic">
+              Recetas, sin conexión
+            </p>
           </div>
         </div>
+
+        {/* Divisor "vid" — motivo orgánico de remate Art Nouveau */}
+        <svg
+          className="divider-vine relative z-10"
+          viewBox="0 0 1200 24"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 6 C 150 22, 300 -8, 450 10 C 600 26, 750 -6, 900 10 C 1050 24, 1100 4, 1200 12"
+            fill="none"
+            stroke="#c9a13b"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.85"
+          />
+          <circle cx="220" cy="14" r="3" fill="#c9a13b" opacity="0.8" />
+          <circle cx="620" cy="9" r="3" fill="#c9a13b" opacity="0.8" />
+          <circle cx="980" cy="15" r="3" fill="#c9a13b" opacity="0.8" />
+        </svg>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
         {error && (
-          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
             {error}
-            <button 
-              onClick={cargarRecetas} 
-              className="ml-4 underline text-sm hover:text-red-800 transition"
-            >
+            <button onClick={cargarRecetas} className="ml-4 underline text-sm">
               Reintentar
             </button>
           </div>
         )}
 
-        <h2 className="text-2xl font-semibold text-nouveau-accent mb-8 ornament-top">
-          Todas las recetas
-        </h2>
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="font-display text-2xl font-semibold text-primary-dark">
+            Todas las recetas
+          </h2>
+          <span className="flex-1 h-px bg-gradient-to-r from-secondary via-border to-transparent" />
+        </div>
 
         {cargando ? (
-          <div className="flex flex-col items-center justify-center py-16 text-text-light">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <svg className="animate-spin h-8 w-8 mb-3 text-primary" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            <p className="text-sm">Cargando recetas...</p>
+            <p className="text-sm italic">Cargando recetas...</p>
           </div>
         ) : recetas.length === 0 ? (
-          <div className="card-nouveau text-center py-12">
-            <p className="text-text-light">No hay recetas disponibles.</p>
+          <div className="card-nouveau p-8 text-center">
+            <p className="text-text-dark italic">No hay recetas disponibles.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-7">
             {recetas.map((receta) => (
               <Link
                 key={receta.id}
                 href={`/receta/${receta.id}`}
-                className="card-nouveau group animate-fade-in"
+                className="card-nouveau p-5 animate-fade-in group block"
               >
                 {receta.imagen_url && (
-                  <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-gray-100">
+                  <div className="w-full h-48 rounded-[20px_6px_20px_6px] overflow-hidden mb-4 bg-gray-100 ring-1 ring-border/60">
                     <img
                       src={receta.imagen_url}
                       alt={receta.nombre}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                 )}
-                <h3 className="text-lg font-semibold text-nouveau-accent mb-2 group-hover:text-primary-dark transition-colors">
+                <h3 className="font-display text-lg font-semibold text-primary-dark mb-2 group-hover:text-accent transition-colors">
                   {receta.nombre}
                 </h3>
                 {receta.descripcion && (
-                  <p className="text-sm text-text-light mb-3 line-clamp-2">
+                  <p className="text-sm text-text-dark/90 mb-3 line-clamp-2">
                     {receta.descripcion}
                   </p>
                 )}
-                <div className="flex items-center gap-3 text-xs text-text-light">
+                <div className="flex items-center gap-3 text-xs text-text-dark/60">
                   {receta.tiempo_minutos && (
-                    <span className="flex items-center gap-1">
-                      ⏱️ {receta.tiempo_minutos} min
+                    <span className="flex items-center gap-1 bg-background px-2.5 py-1 rounded-full border border-border">
+                      <svg className="w-3.5 h-3.5 text-accent-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {receta.tiempo_minutos} min
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    🥘 {receta.ingredientes?.length || 0} ingredientes
+                  <span className="flex items-center gap-1 bg-background px-2.5 py-1 rounded-full border border-border">
+                    <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    {receta.ingredientes?.length || 0} ingredientes
                   </span>
                 </div>
               </Link>

@@ -22,13 +22,16 @@ export default function OnlineIndicator() {
 
   return (
     <div
-      className={`fixed bottom-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-300 ${
+      className={`fixed bottom-4 right-4 px-4 py-2 rounded-[14px_4px_14px_4px] text-sm font-medium shadow-lg transition-all duration-300 border ${
         online
-          ? 'bg-accent-green/10 text-accent-green-dark border border-accent-green/30'
-          : 'bg-accent-rose/10 text-accent-burgundy border border-accent-rose/30'
+          ? 'bg-primary/10 text-primary-dark border-primary/30'
+          : 'bg-accent/10 text-accent border-accent/30'
       }`}
     >
-      <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: online ? 'var(--accent-green)' : 'var(--accent-rose)' }} />
+      <span
+        className="inline-block w-2 h-2 rounded-full mr-2 align-middle"
+        style={{ backgroundColor: online ? 'var(--primary)' : 'var(--accent)' }}
+      />
       {online ? 'Online' : 'Offline'}
     </div>
   );

@@ -1,207 +1,142 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────
+   Paleta Art Nouveau — inspirada en vidrieras de
+   Tiffany, carteles de Mucha y el hierro forjado
+   del Métro de París: salvia, mostaza, malva y oro
+   sobre un fondo de pergamino cálido.
+   ────────────────────────────────────────────── */
 :root {
-  --primary: #b8860b;
-  --primary-light: #daa520;
-  --primary-dark: #8b6914;
-  --accent-green: #6b8e23;
-  --accent-green-light: #8fbc3d;
-  --accent-green-dark: #556b2f;
-  --secondary: #d4a574;
-  --secondary-light: #e0bc94;
-  --secondary-dark: #b08c64;
-  --background: #f9f6f0;
-  --card-bg: #fef9f3;
-  --foreground: #2d1f14;
-  --text-dark: #2d1f14;
-  --text-light: #6b5a4e;
-  --border: #e5ddd1;
-  --wood-light: #d4a574;
-  --wood-medium: #b08c64;
-  --wood-dark: #8b6914;
-  --accent-cream: #fef9f3;
-  --accent-rose: #c4727d;
-  --accent-burgundy: #722f37;
+  --background: #f4ecd9;
+  --foreground: #2f2a1e;
+  --primary: #6f8350;        /* salvia */
+  --primary-dark: #4f6038;
+  --secondary: #c9a13b;      /* mostaza / oro viejo */
+  --secondary-light: #e3c879;
+  --accent: #aa5f7e;         /* malva / rosa antiguo */
+  --accent-2: #4f8d8a;       /* azul huevo de petirrojo */
+  --card-bg: #fffaf0;
+  --text-dark: #4a3a26;
+  --border: #d8c08a;
+  --gold: #b8902f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
-  --color-accent-green: var(--accent-green);
-  --color-accent-green-light: var(--accent-green-light);
-  --color-accent-green-dark: var(--accent-green-dark);
   --color-secondary: var(--secondary);
   --color-secondary-light: var(--secondary-light);
-  --color-secondary-dark: var(--secondary-dark);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
   --color-card: var(--card-bg);
   --color-text-dark: var(--text-dark);
-  --color-text-light: var(--text-light);
   --color-border: var(--border);
+  --color-gold: var(--gold);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Georgia, 'Times New Roman', serif;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(111, 131, 80, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(170, 95, 126, 0.07) 0%, transparent 45%);
+  background-attachment: fixed;
 }
 
-/* Gradientes */
-.gradient-nouveau {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-green) 100%);
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
 }
 
-/* Tarjetas */
-.card-nouveau {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(139, 105, 20, 0.08);
-  transition: all 0.3s ease;
-}
-
-.card-nouveau:hover {
-  box-shadow: 0 8px 24px rgba(139, 105, 20, 0.15);
-  transform: translateY(-2px);
-}
-
-/* Botones */
-.btn-nouveau {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(139, 105, 20, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-nouveau:hover {
-  box-shadow: 0 4px 12px rgba(139, 105, 20, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-nouveau-secondary {
-  background: transparent;
-  color: var(--primary);
-  border: 2px solid var(--primary);
-  padding: 0.625rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.btn-nouveau-secondary:hover {
-  background: var(--primary);
-  color: white;
-}
-
-/* Inputs */
-.input-nouveau {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  color: var(--text-dark);
-  transition: all 0.3s ease;
-}
-
-.input-nouveau:focus {
-  outline: none;
-  border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.15);
-}
-
-/* Divisores */
-.divider-nouveau {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
-  position: relative;
-  margin: 1.5rem 0;
-}
-
-.divider-nouveau::before {
-  content: '✦';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--background);
-  padding: 0 0.75rem;
-  color: var(--primary-light);
-}
-
-/* Utilidades */
-.text-nouveau-accent {
-  color: var(--primary);
-}
-
-.border-ornamental {
-  border-color: var(--border);
-}
-
-.ornament-top {
-  position: relative;
-  padding-top: 0.75rem;
-}
-
-.ornament-top::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3rem;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  border-radius: 2px;
-}
-
-/* Animaciones */
+/* ── Animaciones ── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes floatIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes ornamentalGlow {
-  0%, 100% { text-shadow: 0 0 0px rgba(184, 134, 11, 0); }
-  50% { text-shadow: 0 0 8px rgba(184, 134, 11, 0.3); }
-}
-
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.45s ease-out;
 }
 
-.animate-slide-in-left {
-  animation: slideInLeft 0.5s ease-out;
+@keyframes growVine {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
 }
 
-.animate-slide-in-right {
-  animation: slideInRight 0.5s ease-out;
+/* ── Tarjetas con borde orgánico asimétrico ── */
+.card-nouveau {
+  border-radius: 28px 8px 28px 8px;
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(74, 58, 38, 0.06), 0 8px 20px -8px rgba(74, 58, 38, 0.12);
+  transition: box-shadow 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
+}
+.card-nouveau:hover {
+  box-shadow: 0 2px 4px rgba(74, 58, 38, 0.08), 0 16px 32px -10px rgba(111, 131, 80, 0.28);
+  transform: translateY(-3px);
+  border-color: var(--gold);
 }
 
-.animate-float-in {
-  animation: floatIn 0.6s ease-out;
+/* esquina ornamental tipo "whiplash" */
+.card-nouveau::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 30px;
+  height: 30px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+  border-radius: 28px 0 0 0;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.card-nouveau::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 30px;
+  height: 30px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+  border-radius: 0 0 28px 0;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.animate-ornamental-glow {
-  animation: ornamentalGlow 3s ease-in-out infinite;
+/* ── Hairline dorado decorativo bajo títulos ── */
+.divider-vine {
+  display: block;
+  width: 100%;
+  height: 14px;
+}
+
+/* ── Fondo del header con textura de vidriera sutil ── */
+.header-nouveau {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent) 130%);
+  position: relative;
+  overflow: hidden;
+}
+.header-nouveau::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.10) 0%, transparent 35%),
+                     radial-gradient(circle at 90% 100%, rgba(255,255,255,0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ── Scrollbar discreta ── */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 8px;
+  border: 2px solid var(--background);
 }

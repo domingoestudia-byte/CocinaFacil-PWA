@@ -1,0 +1,1011 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+AGENTS.md
+app/globals.css
+app/layout.js
+app/page.js
+app/receta/[id]/page.js
+CLAUDE.md
+components/OnlineIndicator.js
+jsconfig.json
+lib/supabaseClient.js
+next.config.js
+next.config.mjs
+package.json
+postcss.config.mjs
+public/file.svg
+public/globe.svg
+public/manifest.json
+public/next.svg
+public/sw.js
+public/vercel.svg
+public/window.svg
+public/workbox-8232f3e4.js
+README.md
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# archivos del enunciado (no subir al repo público del alumno)
+ENUNCIADO.md
+SOLUCION-GUIA.md
+setup.sql
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="AGENTS.md">
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+
+:root {
+  --background: #f5e6d3;
+  --foreground: #3d2817;
+  --primary: #c67b4b;
+  --primary-dark: #a35d32;
+  --secondary: #e8c49a;
+  --accent: #8b9f6b;
+  --card-bg: #fff8f0;
+  --text-dark: #5c3a1e;
+  --border: #d9c4a8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-card: var(--card-bg);
+  --color-text-dark: var(--text-dark);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+</file>
+
+<file path="app/layout.js">
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "CocinaFácil - Recetas Offline",
+  description: "App de recetas de cocina que funciona sin conexión",
+  manifest: "/manifest.json",
+  themeColor: "#c67b4b",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "CocinaFácil",
+  },
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">{children}</body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/page.js">
+'use client';
+
+import { useState, useEffect } from 'react';
+import supabase from '@/lib/supabaseClient';
+import OnlineIndicator from '@/components/OnlineIndicator';
+import Link from 'next/link';
+
+export default function Home() {
+  const [recetas, setRecetas] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    cargarRecetas();
+  }, []);
+
+  const cargarRecetas = async () => {
+    try {
+      const { data, error: err } = await supabase
+        .from('recetas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (err) throw err;
+      setRecetas(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar recetas:', err.message);
+      setError('No se pudieron cargar las recetas.');
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col flex-1 bg-background">
+      <header className="bg-primary text-white shadow-md">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🍳</span>
+              <h1 className="text-2xl font-bold tracking-tight">CocinaFácil</h1>
+            </div>
+            <p className="text-sm text-primary-light hidden sm:block">Recetas offline</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+            {error}
+            <button onClick={cargarRecetas} className="ml-4 underline text-sm">Reintentar</button>
+          </div>
+        )}
+
+        <h2 className="text-xl font-semibold text-primary mb-6">Todas las recetas</h2>
+
+        {cargando ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <svg className="animate-spin h-8 w-8 mb-3 text-primary" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <p className="text-sm">Cargando recetas...</p>
+          </div>
+        ) : recetas.length === 0 ? (
+          <div className="bg-card rounded-xl border border-border p-8 text-center">
+            <p className="text-gray-500">No hay recetas disponibles.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {recetas.map((receta) => (
+              <Link
+                key={receta.id}
+                href={`/receta/${receta.id}`}
+                className="bg-card rounded-xl shadow-sm border border-border p-5 hover:shadow-md transition-all duration-300 animate-fade-in group"
+              >
+                {receta.imagen_url && (
+                  <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-gray-100">
+                    <img
+                      src={receta.imagen_url}
+                      alt={receta.nombre}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold text-primary mb-2 group-hover:text-primary-dark transition-colors">
+                  {receta.nombre}
+                </h3>
+                {receta.descripcion && (
+                  <p className="text-sm text-text-dark mb-3 line-clamp-2">{receta.descripcion}</p>
+                )}
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  {receta.tiempo_minutos && (
+                    <span className="flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {receta.tiempo_minutos} min
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    {receta.ingredientes?.length || 0} ingredientes
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </main>
+
+      <OnlineIndicator />
+    </div>
+  );
+}
+</file>
+
+<file path="app/receta/[id]/page.js">
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import supabase from '@/lib/supabaseClient';
+import Link from 'next/link';
+
+export default function RecetaPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [receta, setReceta] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!params.id) return;
+    cargarReceta(params.id);
+  }, [params.id]);
+
+  const cargarReceta = async (id) => {
+    try {
+      const { data, error: err } = await supabase
+        .from('recetas')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (err) throw err;
+      setReceta(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error al cargar receta:', err.message);
+      setError('No se pudo cargar la receta.');
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  if (cargando) {
+    return (
+      <div className="flex flex-col flex-1 bg-background">
+        <header className="bg-primary text-white shadow-md">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+            <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+          </div>
+        </header>
+        <div className="flex flex-1 items-center justify-center">
+          <svg className="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !receta) {
+    return (
+      <div className="flex flex-col flex-1 bg-background">
+        <header className="bg-primary text-white shadow-md">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+            <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+          </div>
+        </header>
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-12 text-center">
+          <p className="text-red-600 mb-4">{error || 'Receta no encontrada'}</p>
+          <Link href="/" className="text-primary underline">Volver al inicio</Link>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col flex-1 bg-background">
+      <header className="bg-primary text-white shadow-md">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <Link href="/" className="text-primary-light hover:text-white text-sm">← Volver</Link>
+        </div>
+      </header>
+
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+        <article className="bg-card rounded-xl shadow-sm border border-border overflow-hidden animate-fade-in">
+          {receta.imagen_url && (
+            <div className="w-full h-64 sm:h-80 bg-gray-100">
+              <img
+                src={receta.imagen_url}
+                alt={receta.nombre}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          <div className="p-6 sm:p-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-3">{receta.nombre}</h1>
+            {receta.descripcion && (
+              <p className="text-text-dark mb-6 leading-relaxed">{receta.descripcion}</p>
+            )}
+
+            <div className="flex flex-wrap gap-4 mb-8 text-sm text-gray-500">
+              {receta.tiempo_minutos && (
+                <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border border-border">
+                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {receta.tiempo_minutos} minutos
+                </span>
+              )}
+              <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border border-border">
+                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                {receta.ingredientes?.length || 0} ingredientes
+              </span>
+            </div>
+
+            {receta.ingredientes && receta.ingredientes.length > 0 && (
+              <section className="mb-8">
+                <h2 className="text-xl font-semibold text-primary mb-4">Ingredientes</h2>
+                <ul className="space-y-2">
+                  {receta.ingredientes.map((ing, i) => (
+                    <li key={i} className="flex items-start gap-3 text-text-dark">
+                      <span className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                      {ing}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {receta.pasos && receta.pasos.length > 0 && (
+              <section>
+                <h2 className="text-xl font-semibold text-primary mb-4">Preparación</h2>
+                <ol className="space-y-4">
+                  {receta.pasos.map((paso, i) => (
+                    <li key={i} className="flex gap-4">
+                      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                        {i + 1}
+                      </span>
+                      <p className="text-text-dark pt-1 leading-relaxed">{paso}</p>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+          </div>
+        </article>
+      </main>
+    </div>
+  );
+}
+</file>
+
+<file path="CLAUDE.md">
+@AGENTS.md
+</file>
+
+<file path="components/OnlineIndicator.js">
+'use client';
+
+import { useState, useEffect } from 'react';
+
+export default function OnlineIndicator() {
+  const [online, setOnline] = useState(true);
+
+  useEffect(() => {
+    setOnline(navigator.onLine);
+
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return (
+    <div
+      className={`fixed bottom-4 right-4 px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-300 ${
+        online
+          ? 'bg-green-100 text-green-800 border border-green-200'
+          : 'bg-red-100 text-red-800 border border-red-200'
+      }`}
+    >
+      <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: online ? '#22c55e' : '#ef4444' }} />
+      {online ? 'Online' : 'Offline'}
+    </div>
+  );
+}
+</file>
+
+<file path="jsconfig.json">
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+</file>
+
+<file path="lib/supabaseClient.js">
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Faltan las variables de entorno de Supabase');
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export default supabase;
+</file>
+
+<file path="next.config.js">
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'offline-cache',
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 60 * 5, // 5 minutos
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico|woff|woff2|ttf)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+        },
+      },
+    },
+  ],
+});
+
+module.exports = withPWA({
+  reactStrictMode: true,
+  turbopack: {},
+});
+</file>
+
+<file path="next.config.mjs">
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "temp-cocina",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "next": "16.2.9",
+    "next-pwa": "^5.6.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
+  }
+}
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/manifest.json">
+{
+  "name": "CocinaFácil - Recetas Offline",
+  "short_name": "CocinaFácil",
+  "description": "App de recetas de cocina que funciona sin conexión",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5e6d3",
+  "theme_color": "#c67b4b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/sw.js">
+if(!self.define){let e,s={};const a=(a,i)=>(a=new URL(a+".js",i).href,s[a]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=a,e.onload=s,document.head.appendChild(e)}else e=a,importScripts(a),s()}).then(()=>{let e=s[a];if(!e)throw new Error(`Module ${a} didn’t register its module`);return e}));self.define=(i,t)=>{const n=e||("document"in self?document.currentScript.src:"")||location.href;if(s[n])return;let c={};const f=e=>a(e,n),r={module:{uri:n},exports:c,require:f};s[n]=Promise.all(i.map(e=>r[e]||f(e))).then(e=>(t(...e),c))}}define(["./workbox-8232f3e4"],function(e){"use strict";importScripts(),self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"/_next/static/7n4Mz9ZmBo39Np8g4Vqrv/_buildManifest.js",revision:"dbba3e537caa08a0eb965f264dd813c0"},{url:"/_next/static/7n4Mz9ZmBo39Np8g4Vqrv/_ssgManifest.js",revision:"b6652df95db52feb4daf4eca35380933"},{url:"/_next/static/chunks/228-79580262f0e3cc74.js",revision:"79580262f0e3cc74"},{url:"/_next/static/chunks/44530001-40bf369248b5e89e.js",revision:"40bf369248b5e89e"},{url:"/_next/static/chunks/4bd1b696-215e5051988c3dde.js",revision:"215e5051988c3dde"},{url:"/_next/static/chunks/794-307f158afcf5cb52.js",revision:"307f158afcf5cb52"},{url:"/_next/static/chunks/899.1813981119fa1f8a.js",revision:"1813981119fa1f8a"},{url:"/_next/static/chunks/966.1775eb621d8d3e09.js",revision:"1775eb621d8d3e09"},{url:"/_next/static/chunks/app/_global-error/page-aba28f88d5781771.js",revision:"aba28f88d5781771"},{url:"/_next/static/chunks/app/_not-found/page-a50577e8f100d1e4.js",revision:"a50577e8f100d1e4"},{url:"/_next/static/chunks/app/layout-4aa8c9fbfd1c92e9.js",revision:"4aa8c9fbfd1c92e9"},{url:"/_next/static/chunks/app/page-a37edcf628cbb6dd.js",revision:"a37edcf628cbb6dd"},{url:"/_next/static/chunks/app/receta/%5Bid%5D/page-fb66262115b042d7.js",revision:"fb66262115b042d7"},{url:"/_next/static/chunks/framework-93cda6578f6c76ec.js",revision:"93cda6578f6c76ec"},{url:"/_next/static/chunks/main-86c776caf6d09325.js",revision:"86c776caf6d09325"},{url:"/_next/static/chunks/main-app-5b6aed81c560ef94.js",revision:"5b6aed81c560ef94"},{url:"/_next/static/chunks/next/dist/client/components/builtin/app-error-aba28f88d5781771.js",revision:"aba28f88d5781771"},{url:"/_next/static/chunks/next/dist/client/components/builtin/forbidden-aba28f88d5781771.js",revision:"aba28f88d5781771"},{url:"/_next/static/chunks/next/dist/client/components/builtin/global-error-0bd0bd1498f19fc7.js",revision:"0bd0bd1498f19fc7"},{url:"/_next/static/chunks/next/dist/client/components/builtin/not-found-aba28f88d5781771.js",revision:"aba28f88d5781771"},{url:"/_next/static/chunks/next/dist/client/components/builtin/unauthorized-aba28f88d5781771.js",revision:"aba28f88d5781771"},{url:"/_next/static/chunks/polyfills-42372ed130431b0a.js",revision:"846118c33b2c0e922d7b3a7676f81f6f"},{url:"/_next/static/chunks/webpack-98edfe35f80668fe.js",revision:"98edfe35f80668fe"},{url:"/_next/static/css/f8f2bbb0b8d67a83.css",revision:"f8f2bbb0b8d67a83"},{url:"/_next/static/media/013b72fa676f92e0-s.woff2",revision:"bc06a1ea50382b6956e53aeb91c889c1"},{url:"/_next/static/media/22a5144ee8d83bca-s.p.woff2",revision:"f4634c3bc1fa7cb53247e1f2872adb5a"},{url:"/_next/static/media/2b5b02fc7e511755-s.woff2",revision:"a27466d069120e75e25b4fd06edd5be2"},{url:"/_next/static/media/65f03d54ccadf4a8-s.woff2",revision:"58bcf4f276e0844890901b91c411447c"},{url:"/_next/static/media/7d4881bb7e1bf84d-s.p.woff2",revision:"cd5b25781181c5c03d99ac2cbf88016a"},{url:"/_next/static/media/9766a7e9e2e0ad5a-s.woff2",revision:"9a45f5a5937490fac6d4f5043a36c125"},{url:"/_next/static/media/aa016aab0e6d1295-s.woff2",revision:"49215a3bccaeb5d483f4cf8fceb24776"},{url:"/_next/static/media/b66cf8e69499582a-s.woff2",revision:"dea7cff2e11a000dc4e0e913992f9c21"},{url:"/_next/static/media/b9408752a0c24fb9-s.woff2",revision:"c10faa6c8fbd7a47d8f00e75e82935cb"},{url:"/_next/static/media/e038a29029a234f2-s.woff2",revision:"42a21c981b367f31bd04683072dae1c1"},{url:"/_next/static/media/f639721981034f88-s.woff2",revision:"f4a75186954722ca80df35984adf581d"},{url:"/file.svg",revision:"d09f95206c3fa0bb9bd9fefabfd0ea71"},{url:"/globe.svg",revision:"2aaafa6a49b6563925fe440891e32717"},{url:"/manifest.json",revision:"2a8631936312afe9d873236f688db714"},{url:"/next.svg",revision:"8e061864f388b47f33a1c3780831193e"},{url:"/vercel.svg",revision:"c0af2f507b369b085b35ef4bbe3bcf1e"},{url:"/window.svg",revision:"a2760511c65806022ad20adf74370ff3"}],{ignoreURLParametersMatching:[]}),e.cleanupOutdatedCaches(),e.registerRoute("/",new e.NetworkFirst({cacheName:"start-url",plugins:[{cacheWillUpdate:async({request:e,response:s,event:a,state:i})=>s&&"opaqueredirect"===s.type?new Response(s.body,{status:200,statusText:"OK",headers:s.headers}):s}]}),"GET"),e.registerRoute(/^https?.*/,new e.NetworkFirst({cacheName:"offline-cache",plugins:[new e.ExpirationPlugin({maxEntries:200,maxAgeSeconds:300}),new e.CacheableResponsePlugin({statuses:[0,200]})]}),"GET"),e.registerRoute(/\.(?:png|jpg|jpeg|svg|webp|gif|ico|woff|woff2|ttf)$/,new e.CacheFirst({cacheName:"static-assets",plugins:[new e.ExpirationPlugin({maxEntries:100,maxAgeSeconds:2592e3})]}),"GET")});
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="public/workbox-8232f3e4.js">
+define(["exports"],function(t){"use strict";try{self["workbox:core:6.5.4"]&&_()}catch(t){}const e=(t,...e)=>{let s=t;return e.length>0&&(s+=` :: ${JSON.stringify(e)}`),s};class s extends Error{constructor(t,s){super(e(t,s)),this.name=t,this.details=s}}try{self["workbox:routing:6.5.4"]&&_()}catch(t){}const n=t=>t&&"object"==typeof t?t:{handle:t};class i{constructor(t,e,s="GET"){this.handler=n(e),this.match=t,this.method=s}setCatchHandler(t){this.catchHandler=n(t)}}class r extends i{constructor(t,e,s){super(({url:e})=>{const s=t.exec(e.href);if(s&&(e.origin===location.origin||0===s.index))return s.slice(1)},e,s)}}class a{constructor(){this.t=new Map,this.i=new Map}get routes(){return this.t}addFetchListener(){self.addEventListener("fetch",t=>{const{request:e}=t,s=this.handleRequest({request:e,event:t});s&&t.respondWith(s)})}addCacheListener(){self.addEventListener("message",t=>{if(t.data&&"CACHE_URLS"===t.data.type){const{payload:e}=t.data,s=Promise.all(e.urlsToCache.map(e=>{"string"==typeof e&&(e=[e]);const s=new Request(...e);return this.handleRequest({request:s,event:t})}));t.waitUntil(s),t.ports&&t.ports[0]&&s.then(()=>t.ports[0].postMessage(!0))}})}handleRequest({request:t,event:e}){const s=new URL(t.url,location.href);if(!s.protocol.startsWith("http"))return;const n=s.origin===location.origin,{params:i,route:r}=this.findMatchingRoute({event:e,request:t,sameOrigin:n,url:s});let a=r&&r.handler;const o=t.method;if(!a&&this.i.has(o)&&(a=this.i.get(o)),!a)return;let c;try{c=a.handle({url:s,request:t,event:e,params:i})}catch(t){c=Promise.reject(t)}const h=r&&r.catchHandler;return c instanceof Promise&&(this.o||h)&&(c=c.catch(async n=>{if(h)try{return await h.handle({url:s,request:t,event:e,params:i})}catch(t){t instanceof Error&&(n=t)}if(this.o)return this.o.handle({url:s,request:t,event:e});throw n})),c}findMatchingRoute({url:t,sameOrigin:e,request:s,event:n}){const i=this.t.get(s.method)||[];for(const r of i){let i;const a=r.match({url:t,sameOrigin:e,request:s,event:n});if(a)return i=a,(Array.isArray(i)&&0===i.length||a.constructor===Object&&0===Object.keys(a).length||"boolean"==typeof a)&&(i=void 0),{route:r,params:i}}return{}}setDefaultHandler(t,e="GET"){this.i.set(e,n(t))}setCatchHandler(t){this.o=n(t)}registerRoute(t){this.t.has(t.method)||this.t.set(t.method,[]),this.t.get(t.method).push(t)}unregisterRoute(t){if(!this.t.has(t.method))throw new s("unregister-route-but-not-found-with-method",{method:t.method});const e=this.t.get(t.method).indexOf(t);if(!(e>-1))throw new s("unregister-route-route-not-registered");this.t.get(t.method).splice(e,1)}}let o;const c=()=>(o||(o=new a,o.addFetchListener(),o.addCacheListener()),o);function h(t,e,n){let a;if("string"==typeof t){const s=new URL(t,location.href);a=new i(({url:t})=>t.href===s.href,e,n)}else if(t instanceof RegExp)a=new r(t,e,n);else if("function"==typeof t)a=new i(t,e,n);else{if(!(t instanceof i))throw new s("unsupported-route-type",{moduleName:"workbox-routing",funcName:"registerRoute",paramName:"capture"});a=t}return c().registerRoute(a),a}try{self["workbox:strategies:6.5.4"]&&_()}catch(t){}const u={cacheWillUpdate:async({response:t})=>200===t.status||0===t.status?t:null},l={googleAnalytics:"googleAnalytics",precache:"precache-v2",prefix:"workbox",runtime:"runtime",suffix:"undefined"!=typeof registration?registration.scope:""},f=t=>[l.prefix,t,l.suffix].filter(t=>t&&t.length>0).join("-"),w=t=>t||f(l.precache),d=t=>t||f(l.runtime);function p(t,e){const s=new URL(t);for(const t of e)s.searchParams.delete(t);return s.href}class y{constructor(){this.promise=new Promise((t,e)=>{this.resolve=t,this.reject=e})}}const m=new Set;function g(t){return"string"==typeof t?new Request(t):t}class R{constructor(t,e){this.h={},Object.assign(this,e),this.event=e.event,this.u=t,this.l=new y,this.p=[],this.m=[...t.plugins],this.R=new Map;for(const t of this.m)this.R.set(t,{});this.event.waitUntil(this.l.promise)}async fetch(t){const{event:e}=this;let n=g(t);if("navigate"===n.mode&&e instanceof FetchEvent&&e.preloadResponse){const t=await e.preloadResponse;if(t)return t}const i=this.hasCallback("fetchDidFail")?n.clone():null;try{for(const t of this.iterateCallbacks("requestWillFetch"))n=await t({request:n.clone(),event:e})}catch(t){if(t instanceof Error)throw new s("plugin-error-request-will-fetch",{thrownErrorMessage:t.message})}const r=n.clone();try{let t;t=await fetch(n,"navigate"===n.mode?void 0:this.u.fetchOptions);for(const s of this.iterateCallbacks("fetchDidSucceed"))t=await s({event:e,request:r,response:t});return t}catch(t){throw i&&await this.runCallbacks("fetchDidFail",{error:t,event:e,originalRequest:i.clone(),request:r.clone()}),t}}async fetchAndCachePut(t){const e=await this.fetch(t),s=e.clone();return this.waitUntil(this.cachePut(t,s)),e}async cacheMatch(t){const e=g(t);let s;const{cacheName:n,matchOptions:i}=this.u,r=await this.getCacheKey(e,"read"),a=Object.assign(Object.assign({},i),{cacheName:n});s=await caches.match(r,a);for(const t of this.iterateCallbacks("cachedResponseWillBeUsed"))s=await t({cacheName:n,matchOptions:i,cachedResponse:s,request:r,event:this.event})||void 0;return s}async cachePut(t,e){const n=g(t);var i;await(i=0,new Promise(t=>setTimeout(t,i)));const r=await this.getCacheKey(n,"write");if(!e)throw new s("cache-put-with-no-response",{url:(a=r.url,new URL(String(a),location.href).href.replace(new RegExp(`^${location.origin}`),""))});var a;const o=await this.v(e);if(!o)return!1;const{cacheName:c,matchOptions:h}=this.u,u=await self.caches.open(c),l=this.hasCallback("cacheDidUpdate"),f=l?await async function(t,e,s,n){const i=p(e.url,s);if(e.url===i)return t.match(e,n);const r=Object.assign(Object.assign({},n),{ignoreSearch:!0}),a=await t.keys(e,r);for(const e of a)if(i===p(e.url,s))return t.match(e,n)}(u,r.clone(),["__WB_REVISION__"],h):null;try{await u.put(r,l?o.clone():o)}catch(t){if(t instanceof Error)throw"QuotaExceededError"===t.name&&await async function(){for(const t of m)await t()}(),t}for(const t of this.iterateCallbacks("cacheDidUpdate"))await t({cacheName:c,oldResponse:f,newResponse:o.clone(),request:r,event:this.event});return!0}async getCacheKey(t,e){const s=`${t.url} | ${e}`;if(!this.h[s]){let n=t;for(const t of this.iterateCallbacks("cacheKeyWillBeUsed"))n=g(await t({mode:e,request:n,event:this.event,params:this.params}));this.h[s]=n}return this.h[s]}hasCallback(t){for(const e of this.u.plugins)if(t in e)return!0;return!1}async runCallbacks(t,e){for(const s of this.iterateCallbacks(t))await s(e)}*iterateCallbacks(t){for(const e of this.u.plugins)if("function"==typeof e[t]){const s=this.R.get(e),n=n=>{const i=Object.assign(Object.assign({},n),{state:s});return e[t](i)};yield n}}waitUntil(t){return this.p.push(t),t}async doneWaiting(){let t;for(;t=this.p.shift();)await t}destroy(){this.l.resolve(null)}async v(t){let e=t,s=!1;for(const t of this.iterateCallbacks("cacheWillUpdate"))if(e=await t({request:this.request,response:e,event:this.event})||void 0,s=!0,!e)break;return s||e&&200!==e.status&&(e=void 0),e}}class v{constructor(t={}){this.cacheName=d(t.cacheName),this.plugins=t.plugins||[],this.fetchOptions=t.fetchOptions,this.matchOptions=t.matchOptions}handle(t){const[e]=this.handleAll(t);return e}handleAll(t){t instanceof FetchEvent&&(t={event:t,request:t.request});const e=t.event,s="string"==typeof t.request?new Request(t.request):t.request,n="params"in t?t.params:void 0,i=new R(this,{event:e,request:s,params:n}),r=this.q(i,s,e);return[r,this.D(r,i,s,e)]}async q(t,e,n){let i;await t.runCallbacks("handlerWillStart",{event:n,request:e});try{if(i=await this.U(e,t),!i||"error"===i.type)throw new s("no-response",{url:e.url})}catch(s){if(s instanceof Error)for(const r of t.iterateCallbacks("handlerDidError"))if(i=await r({error:s,event:n,request:e}),i)break;if(!i)throw s}for(const s of t.iterateCallbacks("handlerWillRespond"))i=await s({event:n,request:e,response:i});return i}async D(t,e,s,n){let i,r;try{i=await t}catch(r){}try{await e.runCallbacks("handlerDidRespond",{event:n,request:s,response:i}),await e.doneWaiting()}catch(t){t instanceof Error&&(r=t)}if(await e.runCallbacks("handlerDidComplete",{event:n,request:s,response:i,error:r}),e.destroy(),r)throw r}}function b(t){t.then(()=>{})}function q(){return q=Object.assign?Object.assign.bind():function(t){for(var e=1;e<arguments.length;e++){var s=arguments[e];for(var n in s)({}).hasOwnProperty.call(s,n)&&(t[n]=s[n])}return t},q.apply(null,arguments)}let D,U;const x=new WeakMap,I=new WeakMap,L=new WeakMap,E=new WeakMap,C=new WeakMap;let N={get(t,e,s){if(t instanceof IDBTransaction){if("done"===e)return I.get(t);if("objectStoreNames"===e)return t.objectStoreNames||L.get(t);if("store"===e)return s.objectStoreNames[1]?void 0:s.objectStore(s.objectStoreNames[0])}return B(t[e])},set:(t,e,s)=>(t[e]=s,!0),has:(t,e)=>t instanceof IDBTransaction&&("done"===e||"store"===e)||e in t};function O(t){return t!==IDBDatabase.prototype.transaction||"objectStoreNames"in IDBTransaction.prototype?(U||(U=[IDBCursor.prototype.advance,IDBCursor.prototype.continue,IDBCursor.prototype.continuePrimaryKey])).includes(t)?function(...e){return t.apply(T(this),e),B(x.get(this))}:function(...e){return B(t.apply(T(this),e))}:function(e,...s){const n=t.call(T(this),e,...s);return L.set(n,e.sort?e.sort():[e]),B(n)}}function k(t){return"function"==typeof t?O(t):(t instanceof IDBTransaction&&function(t){if(I.has(t))return;const e=new Promise((e,s)=>{const n=()=>{t.removeEventListener("complete",i),t.removeEventListener("error",r),t.removeEventListener("abort",r)},i=()=>{e(),n()},r=()=>{s(t.error||new DOMException("AbortError","AbortError")),n()};t.addEventListener("complete",i),t.addEventListener("error",r),t.addEventListener("abort",r)});I.set(t,e)}(t),e=t,(D||(D=[IDBDatabase,IDBObjectStore,IDBIndex,IDBCursor,IDBTransaction])).some(t=>e instanceof t)?new Proxy(t,N):t);var e}function B(t){if(t instanceof IDBRequest)return function(t){const e=new Promise((e,s)=>{const n=()=>{t.removeEventListener("success",i),t.removeEventListener("error",r)},i=()=>{e(B(t.result)),n()},r=()=>{s(t.error),n()};t.addEventListener("success",i),t.addEventListener("error",r)});return e.then(e=>{e instanceof IDBCursor&&x.set(e,t)}).catch(()=>{}),C.set(e,t),e}(t);if(E.has(t))return E.get(t);const e=k(t);return e!==t&&(E.set(t,e),C.set(e,t)),e}const T=t=>C.get(t);const M=["get","getKey","getAll","getAllKeys","count"],P=["put","add","delete","clear"],W=new Map;function j(t,e){if(!(t instanceof IDBDatabase)||e in t||"string"!=typeof e)return;if(W.get(e))return W.get(e);const s=e.replace(/FromIndex$/,""),n=e!==s,i=P.includes(s);if(!(s in(n?IDBIndex:IDBObjectStore).prototype)||!i&&!M.includes(s))return;const r=async function(t,...e){const r=this.transaction(t,i?"readwrite":"readonly");let a=r.store;return n&&(a=a.index(e.shift())),(await Promise.all([a[s](...e),i&&r.done]))[0]};return W.set(e,r),r}N=(t=>q({},t,{get:(e,s,n)=>j(e,s)||t.get(e,s,n),has:(e,s)=>!!j(e,s)||t.has(e,s)}))(N);try{self["workbox:expiration:6.5.4"]&&_()}catch(t){}const S="cache-entries",K=t=>{const e=new URL(t,location.href);return e.hash="",e.href};class A{constructor(t){this._=null,this.I=t}L(t){const e=t.createObjectStore(S,{keyPath:"id"});e.createIndex("cacheName","cacheName",{unique:!1}),e.createIndex("timestamp","timestamp",{unique:!1})}C(t){this.L(t),this.I&&function(t,{blocked:e}={}){const s=indexedDB.deleteDatabase(t);e&&s.addEventListener("blocked",t=>e(t.oldVersion,t)),B(s).then(()=>{})}(this.I)}async setTimestamp(t,e){const s={url:t=K(t),timestamp:e,cacheName:this.I,id:this.N(t)},n=(await this.getDb()).transaction(S,"readwrite",{durability:"relaxed"});await n.store.put(s),await n.done}async getTimestamp(t){const e=await this.getDb(),s=await e.get(S,this.N(t));return null==s?void 0:s.timestamp}async expireEntries(t,e){const s=await this.getDb();let n=await s.transaction(S).store.index("timestamp").openCursor(null,"prev");const i=[];let r=0;for(;n;){const s=n.value;s.cacheName===this.I&&(t&&s.timestamp<t||e&&r>=e?i.push(n.value):r++),n=await n.continue()}const a=[];for(const t of i)await s.delete(S,t.id),a.push(t.url);return a}N(t){return this.I+"|"+K(t)}async getDb(){return this._||(this._=await function(t,e,{blocked:s,upgrade:n,blocking:i,terminated:r}={}){const a=indexedDB.open(t,e),o=B(a);return n&&a.addEventListener("upgradeneeded",t=>{n(B(a.result),t.oldVersion,t.newVersion,B(a.transaction),t)}),s&&a.addEventListener("blocked",t=>s(t.oldVersion,t.newVersion,t)),o.then(t=>{r&&t.addEventListener("close",()=>r()),i&&t.addEventListener("versionchange",t=>i(t.oldVersion,t.newVersion,t))}).catch(()=>{}),o}("workbox-expiration",1,{upgrade:this.C.bind(this)})),this._}}class F{constructor(t,e={}){this.O=!1,this.k=!1,this.B=e.maxEntries,this.T=e.maxAgeSeconds,this.M=e.matchOptions,this.I=t,this.P=new A(t)}async expireEntries(){if(this.O)return void(this.k=!0);this.O=!0;const t=this.T?Date.now()-1e3*this.T:0,e=await this.P.expireEntries(t,this.B),s=await self.caches.open(this.I);for(const t of e)await s.delete(t,this.M);this.O=!1,this.k&&(this.k=!1,b(this.expireEntries()))}async updateTimestamp(t){await this.P.setTimestamp(t,Date.now())}async isURLExpired(t){if(this.T){const e=await this.P.getTimestamp(t),s=Date.now()-1e3*this.T;return void 0===e||e<s}return!1}async delete(){this.k=!1,await this.P.expireEntries(1/0)}}try{self["workbox:cacheable-response:6.5.4"]&&_()}catch(t){}class H{constructor(t={}){this.W=t.statuses,this.j=t.headers}isResponseCacheable(t){let e=!0;return this.W&&(e=this.W.includes(t.status)),this.j&&e&&(e=Object.keys(this.j).some(e=>t.headers.get(e)===this.j[e])),e}}function $(t,e){const s=e();return t.waitUntil(s),s}try{self["workbox:precaching:6.5.4"]&&_()}catch(t){}function G(t){if(!t)throw new s("add-to-cache-list-unexpected-type",{entry:t});if("string"==typeof t){const e=new URL(t,location.href);return{cacheKey:e.href,url:e.href}}const{revision:e,url:n}=t;if(!n)throw new s("add-to-cache-list-unexpected-type",{entry:t});if(!e){const t=new URL(n,location.href);return{cacheKey:t.href,url:t.href}}const i=new URL(n,location.href),r=new URL(n,location.href);return i.searchParams.set("__WB_REVISION__",e),{cacheKey:i.href,url:r.href}}class V{constructor(){this.updatedURLs=[],this.notUpdatedURLs=[],this.handlerWillStart=async({request:t,state:e})=>{e&&(e.originalRequest=t)},this.cachedResponseWillBeUsed=async({event:t,state:e,cachedResponse:s})=>{if("install"===t.type&&e&&e.originalRequest&&e.originalRequest instanceof Request){const t=e.originalRequest.url;s?this.notUpdatedURLs.push(t):this.updatedURLs.push(t)}return s}}}class J{constructor({precacheController:t}){this.cacheKeyWillBeUsed=async({request:t,params:e})=>{const s=(null==e?void 0:e.cacheKey)||this.S.getCacheKeyForURL(t.url);return s?new Request(s,{headers:t.headers}):t},this.S=t}}let Q,z;async function X(t,e){let n=null;if(t.url){n=new URL(t.url).origin}if(n!==self.location.origin)throw new s("cross-origin-copy-response",{origin:n});const i=t.clone(),r={headers:new Headers(i.headers),status:i.status,statusText:i.statusText},a=e?e(r):r,o=function(){if(void 0===Q){const t=new Response("");if("body"in t)try{new Response(t.body),Q=!0}catch(t){Q=!1}Q=!1}return Q}()?i.body:await i.blob();return new Response(o,a)}class Y extends v{constructor(t={}){t.cacheName=w(t.cacheName),super(t),this.K=!1!==t.fallbackToNetwork,this.plugins.push(Y.copyRedirectedCacheableResponsesPlugin)}async U(t,e){const s=await e.cacheMatch(t);return s||(e.event&&"install"===e.event.type?await this.A(t,e):await this.F(t,e))}async F(t,e){let n;const i=e.params||{};if(!this.K)throw new s("missing-precache-entry",{cacheName:this.cacheName,url:t.url});{const s=i.integrity,r=t.integrity,a=!r||r===s;n=await e.fetch(new Request(t,{integrity:"no-cors"!==t.mode?r||s:void 0})),s&&a&&"no-cors"!==t.mode&&(this.H(),await e.cachePut(t,n.clone()))}return n}async A(t,e){this.H();const n=await e.fetch(t);if(!await e.cachePut(t,n.clone()))throw new s("bad-precaching-response",{url:t.url,status:n.status});return n}H(){let t=null,e=0;for(const[s,n]of this.plugins.entries())n!==Y.copyRedirectedCacheableResponsesPlugin&&(n===Y.defaultPrecacheCacheabilityPlugin&&(t=s),n.cacheWillUpdate&&e++);0===e?this.plugins.push(Y.defaultPrecacheCacheabilityPlugin):e>1&&null!==t&&this.plugins.splice(t,1)}}Y.defaultPrecacheCacheabilityPlugin={cacheWillUpdate:async({response:t})=>!t||t.status>=400?null:t},Y.copyRedirectedCacheableResponsesPlugin={cacheWillUpdate:async({response:t})=>t.redirected?await X(t):t};class Z{constructor({cacheName:t,plugins:e=[],fallbackToNetwork:s=!0}={}){this.$=new Map,this.G=new Map,this.V=new Map,this.u=new Y({cacheName:w(t),plugins:[...e,new J({precacheController:this})],fallbackToNetwork:s}),this.install=this.install.bind(this),this.activate=this.activate.bind(this)}get strategy(){return this.u}precache(t){this.addToCacheList(t),this.J||(self.addEventListener("install",this.install),self.addEventListener("activate",this.activate),this.J=!0)}addToCacheList(t){const e=[];for(const n of t){"string"==typeof n?e.push(n):n&&void 0===n.revision&&e.push(n.url);const{cacheKey:t,url:i}=G(n),r="string"!=typeof n&&n.revision?"reload":"default";if(this.$.has(i)&&this.$.get(i)!==t)throw new s("add-to-cache-list-conflicting-entries",{firstEntry:this.$.get(i),secondEntry:t});if("string"!=typeof n&&n.integrity){if(this.V.has(t)&&this.V.get(t)!==n.integrity)throw new s("add-to-cache-list-conflicting-integrities",{url:i});this.V.set(t,n.integrity)}if(this.$.set(i,t),this.G.set(i,r),e.length>0){const t=`Workbox is precaching URLs without revision info: ${e.join(", ")}\nThis is generally NOT safe. Learn more at https://bit.ly/wb-precache`;console.warn(t)}}}install(t){return $(t,async()=>{const e=new V;this.strategy.plugins.push(e);for(const[e,s]of this.$){const n=this.V.get(s),i=this.G.get(e),r=new Request(e,{integrity:n,cache:i,credentials:"same-origin"});await Promise.all(this.strategy.handleAll({params:{cacheKey:s},request:r,event:t}))}const{updatedURLs:s,notUpdatedURLs:n}=e;return{updatedURLs:s,notUpdatedURLs:n}})}activate(t){return $(t,async()=>{const t=await self.caches.open(this.strategy.cacheName),e=await t.keys(),s=new Set(this.$.values()),n=[];for(const i of e)s.has(i.url)||(await t.delete(i),n.push(i.url));return{deletedURLs:n}})}getURLsToCacheKeys(){return this.$}getCachedURLs(){return[...this.$.keys()]}getCacheKeyForURL(t){const e=new URL(t,location.href);return this.$.get(e.href)}getIntegrityForCacheKey(t){return this.V.get(t)}async matchPrecache(t){const e=t instanceof Request?t.url:t,s=this.getCacheKeyForURL(e);if(s){return(await self.caches.open(this.strategy.cacheName)).match(s)}}createHandlerBoundToURL(t){const e=this.getCacheKeyForURL(t);if(!e)throw new s("non-precached-url",{url:t});return s=>(s.request=new Request(t),s.params=Object.assign({cacheKey:e},s.params),this.strategy.handle(s))}}const tt=()=>(z||(z=new Z),z);class et extends i{constructor(t,e){super(({request:s})=>{const n=t.getURLsToCacheKeys();for(const i of function*(t,{ignoreURLParametersMatching:e=[/^utm_/,/^fbclid$/],directoryIndex:s="index.html",cleanURLs:n=!0,urlManipulation:i}={}){const r=new URL(t,location.href);r.hash="",yield r.href;const a=function(t,e=[]){for(const s of[...t.searchParams.keys()])e.some(t=>t.test(s))&&t.searchParams.delete(s);return t}(r,e);if(yield a.href,s&&a.pathname.endsWith("/")){const t=new URL(a.href);t.pathname+=s,yield t.href}if(n){const t=new URL(a.href);t.pathname+=".html",yield t.href}if(i){const t=i({url:r});for(const e of t)yield e.href}}(s.url,e)){const e=n.get(i);if(e){return{cacheKey:e,integrity:t.getIntegrityForCacheKey(e)}}}},t.strategy)}}t.CacheFirst=class extends v{async U(t,e){let n,i=await e.cacheMatch(t);if(!i)try{i=await e.fetchAndCachePut(t)}catch(t){t instanceof Error&&(n=t)}if(!i)throw new s("no-response",{url:t.url,error:n});return i}},t.CacheableResponsePlugin=class{constructor(t){this.cacheWillUpdate=async({response:t})=>this.X.isResponseCacheable(t)?t:null,this.X=new H(t)}},t.ExpirationPlugin=class{constructor(t={}){this.cachedResponseWillBeUsed=async({event:t,request:e,cacheName:s,cachedResponse:n})=>{if(!n)return null;const i=this.Y(n),r=this.Z(s);b(r.expireEntries());const a=r.updateTimestamp(e.url);if(t)try{t.waitUntil(a)}catch(t){}return i?n:null},this.cacheDidUpdate=async({cacheName:t,request:e})=>{const s=this.Z(t);await s.updateTimestamp(e.url),await s.expireEntries()},this.tt=t,this.T=t.maxAgeSeconds,this.et=new Map,t.purgeOnQuotaError&&function(t){m.add(t)}(()=>this.deleteCacheAndMetadata())}Z(t){if(t===d())throw new s("expire-custom-caches-only");let e=this.et.get(t);return e||(e=new F(t,this.tt),this.et.set(t,e)),e}Y(t){if(!this.T)return!0;const e=this.st(t);if(null===e)return!0;return e>=Date.now()-1e3*this.T}st(t){if(!t.headers.has("date"))return null;const e=t.headers.get("date"),s=new Date(e).getTime();return isNaN(s)?null:s}async deleteCacheAndMetadata(){for(const[t,e]of this.et)await self.caches.delete(t),await e.delete();this.et=new Map}},t.NetworkFirst=class extends v{constructor(t={}){super(t),this.plugins.some(t=>"cacheWillUpdate"in t)||this.plugins.unshift(u),this.nt=t.networkTimeoutSeconds||0}async U(t,e){const n=[],i=[];let r;if(this.nt){const{id:s,promise:a}=this.it({request:t,logs:n,handler:e});r=s,i.push(a)}const a=this.rt({timeoutId:r,request:t,logs:n,handler:e});i.push(a);const o=await e.waitUntil((async()=>await e.waitUntil(Promise.race(i))||await a)());if(!o)throw new s("no-response",{url:t.url});return o}it({request:t,logs:e,handler:s}){let n;return{promise:new Promise(e=>{n=setTimeout(async()=>{e(await s.cacheMatch(t))},1e3*this.nt)}),id:n}}async rt({timeoutId:t,request:e,logs:s,handler:n}){let i,r;try{r=await n.fetchAndCachePut(e)}catch(t){t instanceof Error&&(i=t)}return t&&clearTimeout(t),!i&&r||(r=await n.cacheMatch(e)),r}},t.cleanupOutdatedCaches=function(){self.addEventListener("activate",t=>{const e=w();t.waitUntil((async(t,e="-precache-")=>{const s=(await self.caches.keys()).filter(s=>s.includes(e)&&s.includes(self.registration.scope)&&s!==t);return await Promise.all(s.map(t=>self.caches.delete(t))),s})(e).then(t=>{}))})},t.clientsClaim=function(){self.addEventListener("activate",()=>self.clients.claim())},t.precacheAndRoute=function(t,e){!function(t){tt().precache(t)}(t),function(t){const e=tt();h(new et(e,t))}(e)},t.registerRoute=h});
+</file>
+
+<file path="README.md">
+# CocinaFácil — Recetas Offline (PWA)
+
+> Aplicación de recetas de cocina que funciona sin conexión a internet, construida con Next.js + next-pwa + Supabase.
+
+---
+
+## ¿Qué es esto?
+
+CocinaFácil es una Progressive Web App (PWA) de recetas de cocina. El foco está en la experiencia **offline**: una vez que el usuario ha visitado la app, puede consultar las recetas ya cargadas incluso sin conexión. Además, la app es **instalable** en el móvil o escritorio.
+
+Cuenta con un indicador visual de conexión (online/offline) y está diseñada con la estética **Art Nouveau** inspirada en la imagen de referencia ([artnouveau006](https://www.artsparx.com/images/style/artnouveau006.jpg)), con una paleta cálida de naranjas, cremas y marrones que transmite la sensación de cocina casera y artesanal.
+
+---
+
+## Demo
+
+- **Deploy:** Pendiente — se desplegará en Vercel tras completar las cuatro pruebas técnicas.
+- **Repositorio:** [https://github.com/domingoestudia-byte/CocinaFacil-PWA](https://github.com/domingoestudia-byte/CocinaFacil-PWA)
+
+---
+
+## Tecnologías usadas
+
+- **Next.js** (App Router) — Framework de React con renderizado híbrido
+- **next-pwa** — Wrapper de Workbox para Service Workers automáticos
+- **Supabase Database** — PostgreSQL con RLS de solo lectura público
+- **Vercel** — Plataforma de deploy (pendiente)
+- **Tailwind CSS** — Framework de estilos utility-first
+- **Docker** — Para ejecutar Supabase en local
+
+---
+
+## Cómo correrlo en local
+
+```bash
+# 1. Clonar el repositorio
+git clone git@github.com:domingoestudia-byte/CocinaFacil-PWA.git
+cd CocinaFacil-PWA
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Configurar variables de entorno
+# Crea un archivo .env.local en la raíz:
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+
+# 4. Asegúrate de tener Supabase corriendo (Docker)
+
+# 5. Ejecutar el SQL de setup.sql en tu base de datos
+
+# 6. Arrancar (next-pwa se desactiva en desarrollo)
+npm run dev
+```
+
+### Variables de entorno
+
+```
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_tu-anon-key
+```
+
+### SQL para crear la tabla e insertar recetas
+
+```sql
+-- Tabla de recetas
+create table recetas (
+  id uuid default gen_random_uuid() primary key,
+  nombre text not null,
+  descripcion text,
+  ingredientes text[],
+  pasos text[],
+  imagen_url text,
+  tiempo_minutos integer,
+  created_at timestamp with time zone default now()
+);
+
+-- RLS: acceso público de solo lectura
+alter table recetas enable row level security;
+create policy "recetas son publicas" on recetas
+  for select using (true);
+
+-- Permisos para roles anónimo y autenticado
+grant usage on schema public to anon;
+grant all privileges on all tables in schema public to anon;
+grant all privileges on all sequences in schema public to anon;
+grant usage on schema public to authenticated;
+grant all privileges on all tables in schema public to authenticated;
+grant all privileges on all sequences in schema public to authenticated;
+
+-- Recetas de ejemplo (6 platos tradicionales españoles)
+INSERT INTO recetas (id, nombre, descripcion, ingredientes, pasos, tiempo_minutos) VALUES
+('11111111-1111-1111-1111-111111111111', 'Paella Valenciana', 'Receta tradicional de la Comunidad Valenciana con arroz, azafrán y verduras frescas.', ARRAY['400g de arroz bomba', '1 pimiento rojo', '1 pimiento verde', '1 tomate', '100g de judías planas', '100g de garrofón', 'Azafrán', 'Aceite de oliva', 'Sal', 'Agua'], ARRAY['Sofreír verduras', 'Añadir tomate rallado', 'Agregar arroz y azafrán', 'Cocinar 10 min a fuego alto + 8 min a fuego bajo', 'Reposar 5 min'], 45),
+('22222222-2222-2222-2222-222222222222', 'Tortilla de Patata', 'Clásica tortilla española, icono de la gastronomía nacional.', ARRAY['4 patatas medianas', '1 cebolla grande', '6 huevos', 'Aceite de oliva', 'Sal'], ARRAY['Cortar patatas y cebolla', 'Freír hasta tiernas', 'Mezclar con huevos batidos', 'Cuajar por ambos lados'], 30),
+('33333333-3333-3333-3333-333333333333', 'Gazpacho Andaluz', 'Refrescante sopa fría de tomate, ideal para días de calor.', ARRAY['1kg de tomates maduros', '1 pimiento verde', '1 pepino', '1 cebolla pequeña', '2 dientes de ajo', 'Aceite de oliva', 'Vinagre', 'Sal'], ARRAY['Trocear verduras', 'Licuar con aceite y vinagre', 'Añadir agua fría', 'Refrigerar 2 horas'], 15),
+('44444444-4444-4444-4444-444444444444', 'Croquetas de Jamón', 'Cremosas croquetas caseras, un clásico de la cocina española.', ARRAY['500ml de leche', '100g de mantequilla', '100g de harina', '200g de jamón serrano', '2 huevos', 'Pan rallado', 'Aceite', 'Sal', 'Nuez moscada'], ARRAY['Hacer roux', 'Añadir leche poco a poco', 'Incorporar jamón', 'Enfriar 24h', 'Freír hasta dorar'], 60),
+('55555555-5555-5555-5555-555555555555', 'Patatas Bravas', 'Las bravas más cañeras con salsa picante casera.', ARRAY['1kg de patatas', 'Pimentón dulce', 'Pimentón picante', 'Maizena', '1 diente de ajo', 'Vinagre', 'Aceite de oliva', 'Sal'], ARRAY['Cortar y freír patatas', 'Mezclar salsa: pimentones, maizena, ajo, vinagre', 'Cocer salsa hasta espesar', 'Mezclar al servir'], 40),
+('66666666-6666-6666-6666-666666666666', 'Crema Catalana', 'Postre tradicional catalán con capa de azúcar quemado.', ARRAY['1 litro de leche', '6 yemas de huevo', '200g de azúcar', '1 rama de canela', 'Corteza de limón', 'Canela en polvo'], ARRAY['Calentar leche con canela y limón', 'Batir yemas con azúcar', 'Mezclar y cocinar a fuego bajo', 'Verter en cazuelitas', 'Quemar azúcar por encima'], 50);
+```
+
+---
+
+## Estrategia de caché (PWA)
+
+### ¿Por qué `next-pwa`?
+
+En clase vimos que escribir un Service Worker manualmente requiere manejar eventos complejos (`install`, `activate`, `fetch`), gestionar caches por nombre y manejar la limpieza de versiones antiguas. `next-pwa` abstrae todo eso encima de Workbox con una configuración declarativa. Genera el `sw.js` durante el build, lo registra automáticamente y se encarga de las actualizaciones. Para una app de lectura como esta, es la opción más práctica y mantenible.
+
+### Estrategias elegidas en `next.config.js`
+
+| Tipo de contenido | Estrategia Workbox | Motivo |
+|---|---|---|
+| **API** (Supabase REST, fetch, XHR) | `NetworkFirst` | Priorizamos datos frescos. Si hay conexión, Supabase responde y se actualiza la cache. Si no hay red, sirve lo cacheado. TTL: 5 minutos. |
+| **Estáticos** (imágenes `.png/.jpg/.svg`, fuentes `.woff/.ttf`) | `CacheFirst` | Se cachean en cuanto se visitan, sin tocar red. TTL: 30 días. Si una imagen cambia, el usuario la ve actualizada en la próxima sesión online. |
+
+### ¿Cuándo queda desactualizado el contenido?
+
+Las recetas quedan desactualizadas tras **5 minutos** offline. Al volver a tener conexión y recargar, `NetworkFirst` consulta Supabase y actualiza la cache. Para contenido más dinámico (ej: comentarios, favoritos) usaríamos `StaleWhileRevalidate`; para assets inmutables (iconos, logos) `CacheFirst` de por vida.
+
+### Limitación en desarrollo
+
+`next-pwa` detecta `NODE_ENV === 'development'` y desactiva el Service Worker automáticamente. Esto evita problemas de cache persistente durante el desarrollo, donde modificamos código constantemente. Para probar la PWA offline, hay que hacer:
+
+```bash
+npm run build
+npm start
+# Abrir http://localhost:3000 en Chrome
+# DevTools → Application → Service Workers → marcar "Offline"
+# Recargar
+```
+
+---
+
+## Cómo verificar que funciona offline
+
+1. Construir la app: `npm run build && npm start`
+2. Abrir en Chrome con conexión
+3. Navegar por varias recetas (cada visita cachea la página + assets)
+4. Abrir DevTools → Application → **Service Workers**
+5. Marcar la checkbox **"Offline"** (simula falta de conexión)
+6. Recargar la página — las recetas visitadas deben seguir apareciendo
+7. Navegar entre ellas sin problema (el Service Worker responde desde cache)
+8. Desmarcar "Offline" — al recargar, se actualiza desde Supabase
+
+---
+
+## Estructura del proyecto
+
+```
+├── app/
+│   ├── globals.css              # Estilos Art Nouveau (paleta artnouveau006)
+│   ├── layout.js                # Layout base con manifest y themeColor
+│   ├── page.js                  # Lista de recetas (grid responsivo)
+│   └── receta/
+│       └── [id]/page.js         # Detalle de receta (ruta dinámica)
+├── components/
+│   └── OnlineIndicator.js       # Badge online/offline fijo abajo derecha
+├── lib/
+│   └── supabaseClient.js        # Cliente Supabase (navegador)
+├── public/
+│   ├── manifest.json            # Web App Manifest PWA
+│   ├── sw.js                    # Service Worker (generado por next-pwa)
+│   └── workbox-*.js             # Workbox runtime (generado)
+├── next.config.js               # Configuración con next-pwa
+├── .env.local                   # Variables de entorno Supabase
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+---
+
+## Funcionalidades implementadas
+
+### Requeridas
+- ✅ Página principal con lista de recetas cargadas desde Supabase
+- ✅ Página de detalle por receta (título, ingredientes, pasos)
+- ✅ Navegación entre lista y detalle
+- ✅ Offline: recetas visitadas disponibles sin conexión (gracias al Service Worker + cache)
+- ✅ Instalable: manifest.json con nombre, iconos, display standalone
+- ✅ Indicador visual online/offline fijo en la UI
+
+### Opcionales
+- ✅ Página de error/empty state cuando no hay recetas o falla la carga
+- ❌ Botón "Guardar receta para offline" a petición del usuario → no implementado (el contenido se cachea automáticamente al visitar)
+- ❌ Notificación cuando vuelve la conexión → no implementado (el indicador visual ya cubre esta necesidad)
+
+---
+
+## Decisiones técnicas
+
+### 1. ¿Por qué App Router y rutas dinámicas `[id]`?
+
+App Router es el estándar de Next.js para proyectos nuevos. Las rutas dinámicas (`app/receta/[id]/page.js`) permiten cargar cualquier receta por su UUID sin tener que definir rutas estáticas de antemano. Next.js hace SSR en demanda para cada receta mientras que la home (`app/page.js`) se genera estáticamente al build.
+
+### 2. ¿Por qué `use client` en casi todos los componentes?
+
+En App Router, los componentes son Server Components por defecto. Sin embargo, necesitamos `use client` cuando:
+- Usamos `useState` y `useEffect` para cargar datos y manejar el estado de carga.
+- Escuchamos eventos del navegador (`online`, `offline` en `OnlineIndicator`).
+- Usamos `next/link` para navegación cliente.
+
+El layout (`app/layout.js`) **no** tiene `use client` porque solo define metadatos y estructura HTML, sin interactividad.
+
+### 3. ¿Por qué RLS con `USING (true)` en vez de políticas por usuario?
+
+La tabla `recetas` es un catálogo público. No necesitamos saber quién consulta, solo que pueda leer. `FOR SELECT USING (true)` permite todas las lecturas sin restricciones. Si en el futuro se añadiera un panel de administración para crear/editar recetas, se crearían políticas adicionales para `INSERT`, `UPDATE` y `DELETE` restringidas a usuarios autenticados.
+
+### 4. ¿Por qué la paleta Art Nouveau cálida y no la anterior?
+
+La referencia visual `artnouveau006.jpg` es una puerta modernista con tonos predominantemente naranjas, cremas y marrones. A diferencia de la paleta verde/beige de las pruebas anteriores, esta transmite calidez, asociada a la cocina casera y artesanal. Mantiene coherencia con el movimiento Art Nouveau pero con una identidad propia acorde al dominio (recetas de cocina).
+
+### 5. ¿Por qué indicador online/offline en vez de solo elService Worker?
+
+El Service Worker funciona de forma transparente para el usuario. El indicador `OnlineIndicator` da feedback visual explícito del estado de red, que es una funcionalidad core del enunciado. Además, sirve como recordatorio de que la app funciona offline sin depender de que el usuario abra DevTools.
+
+### 6. ¿Por qué `NetworkFirst` y no `CacheFirst` para Supabase?
+
+`NetworkFirst` asegura que mientras haya conexión, los datos vienen de Supabase y están actualizados. Solo cuando no hay red, Workbox sirve la respuesta cacheada. Con `CacheFirst`, el usuario podría ver datos obsoletos durante días (hasta expirar la cache) aunque tuviera conexión disponible. El TTL de 5 minutos es un equilibrio entre frescura y tolerancia a fallos de red breves.
+
+### 7. ¿Por qué `next-pwa` no funciona en desarrollo?
+
+Los Service Workers se cachean agresivamente en el navegador. Si estuvieran activos en desarrollo, cada cambio de código requeriría desregistrar el Service Worker manualmente o limpiar la cache del navegador. `next-pwa` lo desactiva automáticamente cuando `NODE_ENV === 'development'`. Para probar la PWA completa, siempre hay que hacer build de producción (`npm run build && npm start`).
+
+### 8. ¿Por qué no hay autenticación ni CRUD de recetas?
+
+El enunciado lo especifica como "no necesario". Los recursos se enfocaron en:
+- El ciclo completo offline: carga inicial → cache → consulta sin red.
+- Instalabilidad: manifest, iconos, display standalone.
+- Experiencia de usuario: transiciones, estados de carga, feedback de conexión.
+
+Añadir autenticación y CRUD habría añadido complejidad sin aportar valor a los criterios de evaluación, que ponderan mucho más el funcionamiento offline y la instalabilidad.
+
+---
+
+## Flujo de uso offline
+
+```
+[Usuario visita la app con conexión]
+       │
+       ├── next-pwa registra sw.js automáticamente
+       ├── Se cargan recetas desde Supabase
+       ├── Workbox cachea:
+       │     ├── HTML de / y /receta/[id]
+       │     ├── Imágenes de recetas
+       │     ├── JSON de la API de Supabase
+       │     └── Assets estáticos (CSS, JS, fuentes)
+       │
+       └── OnlineIndicator muestra "Online"
+
+[Usuario pierde conexión o activa "Offline" en DevTools]
+       │
+       ├── Navegador detecta offline → event listener en OnlineIndicator
+       ├── Indicador cambia a "Offline" (badge rojo)
+       ├── Usuario recarga o navega:
+       │     ├── Service Worker intercepta peticiones
+       │     ├── NetworkFirst intenta red → falla (sin conexión)
+       │     ├── Workbox sirve respuesta cacheada
+       │     └── Recetas visitadas se muestran correctamente
+       │
+       └── Usuario puede consultar todo el contenido visitado
+```
+
+---
+
+## Criterios de evaluación y estado
+
+| Criterio | Peso | Estado |
+|---|---|---|
+| Funciona offline (recetas ya vistas) | Muy alto | ✅ |
+| Instalable + manifest correcto | Alto | ✅ |
+| Indicador online/offline funcional | Alto | ✅ |
+| Lighthouse PWA score ≥ 70 | Alto | Pendiente de medida |
+| Estrategia de caché justificada | Medio | ✅ (documentada arriba) |
+| Código organizado | Medio | ✅ |
+| UI usable | Bajo | ✅ |
+
+---
+
+## Qué usé de IA y para qué
+
+Usé asistencia de IA (Cline, basado en Claude) para:
+
+- Generar la estructura base con `create-next-app` y configurar `next-pwa`.
+- Implementar el componente `OnlineIndicator` con eventos `online/offline`.
+- Documentar las estrategias de caché (`NetworkFirst` vs `CacheFirst`) y justificarlas en el README.
+- Diseñar la paleta de colores Art Nouveau cálida inspirada en la referencia visual.
+- Escribir las políticas RLS y los scripts SQL de inserción de recetas.
+- Explicar las decisiones técnicas para que sirva como material de estudio.
+
+Cada línea de código y cada explicación fueron revisadas y entendidas antes de integrarlas.
+
+---
+
+## Qué mejoraría con más tiempo
+
+- [x] Funcionalidades obligatorias implementadas (lista + detalle + offline + PWA)
+- [ ] **PWA completos**: Añadir iconos reales de 192x192 y 512x512 en `/public/icons/`. Actualmente el manifest los referencia pero no existen físicamente.
+- [ ] **Lighthouse**: Mover la métrica PWA a ≥ 90 y optimizar el score (compresión de imágenes, lazy loading).
+- [ ] **Notificaciones**: Implementar notificación visual o push cuando vuelve la conexión (ahora solo hay indicador).
+- [ ] **Botón "Guardar para offline"**: Permitir al usuario cachear explícitamente una receta que aún no ha visitado.
+- [ ] **Búsqueda y filtros**: Permitir filtrar por tiempo o ingredientes.
+- [ ] **Deploy en Vercel**: Publicar con HTTPS para Service Worker completo en producción.
+- [ ] **Actualización de cache**: Implementar suscripción a cambios de Supabase para actualizar cache en background.
+
+---
+
+## Lo que aprendí con esta prueba
+
+1. **Progressive Web Apps (PWA)**: Aprendí el ciclo completo: manifest → Service Worker → cache strategies → instalabilidad. Entendí por qué HTTPS es requisito para Service Workers y por qué los SW no funcionan en desarrollo.
+2. **`next-pwa` como herramienta productiva**: Escribir un SW manualmente es factible pero propenso a errores. `next-pwa` + Workbox genera SW optimizado con una configuración declarativa, ideal para proyectos reales.
+3. **Estrategias de caché Workbox**:
+   - `NetworkFirst`: para datos dinámicos que cambian con frecuencia.
+   - `CacheFirst`: para assets inmutables (imágenes, fuentes).
+   - Aprendí a justificar la elección según el tipo de contenido.
+4. **Art Nouveau como sistema de diseño**: Extrapolé la paleta de una imagen de referencia a variables CSS y clases Tailwind, manteniendo coherencia con proyectos anteriores pero con identidad propia.
+5. **Supabase RLS público**: Aprendí que `USING (true)` es la forma más simple de exponer una tabla como catálogo de solo lectura, sin necesidad de autenticación.
+6. **Offline-first UX**: El usuario no debe notar que está offline hasta que intenta cargar algo nuevo. El indicador visual (`OnlineIndicator`) complementa la funcionalidad invisible del Service Worker con feedback explícito.
+</file>
+
+</files>
