@@ -8,7 +8,7 @@
 
 CocinaFácil es una Progressive Web App (PWA) de recetas de cocina. El foco está en la experiencia **offline**: una vez que el usuario ha visitado la app, puede consultar las recetas ya cargadas incluso sin conexión. Además, la app es **instalable** en el móvil o escritorio.
 
-Cuenta con un indicador visual de conexión (online/offline) y está diseñada con la estética **Art Nouveau** inspirada en la imagen de referencia ([artnouveau006](https://www.artsparx.com/images/style/artnouveau006.jpg)), con una paleta cálida de naranjas, cremas y marrones que transmite la sensación de cocina casera y artesanal.
+Cuenta con un indicador visual de conexión (online/offline) y está diseñada con la estética **Art Nouveau** inspirada en la guía de implementación Tailwind Art Nouveau, con una paleta completa de dorados, verdes oliva, beiges cálidos y cremas que transmite la sensación de cocina casera y artesanal.
 
 ---
 
